@@ -1,0 +1,14 @@
+{
+  "welcome": "Welcome",
+  "logout": "Logout",
+  "need_help": "Need help?",
+
+  "nav": {
+    "home": "Home",
+    "clients": "Clients",
+    "listeners": "Listeners",
+    "admin": "Admin",
+    "webhook": "Webhook",
+    "not_found": "Not found"
+  }
+}

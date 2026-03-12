@@ -1,0 +1,13 @@
+{
+  "welcome": "Xush kelibsiz",
+  "logout": "Chiqish",
+  "need_help": "Yordam kerakmi?",
+   "nav": {
+    "home": "Bosh sahifa",
+    "clients": "Mijozlar",
+    "listeners": "Tinglovchilar",
+    "admin": "Admin",
+    "webhook": "Webhook",
+    "not_found": "Topilmadi"
+  }
+}

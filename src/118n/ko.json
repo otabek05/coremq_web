@@ -1,0 +1,13 @@
+{
+  "welcome": "환영합니다",
+  "logout": "로그아웃",
+  "need_help": "도움이 필요하신가요?",
+  "nav": {
+    "home": "홈",
+    "clients": "클라이언트",
+    "listeners": "리스너",
+    "admin": "관리자",
+    "webhook": "웹훅",
+    "not_found": "페이지 없음"
+  }
+}
