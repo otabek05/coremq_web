@@ -1,104 +1,108 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 export const api = axios.create({
-    baseURL: BASE_URL
-})
+    baseURL: `http://${window.location.hostname}:18083` //BASE_URL,
+});
 
 let isRefreshing = false;
-let refreshSubscribers: ((token:string)=> void) [] =  [];
+let failedQueue: {
+    resolve: (token: string) => void;
+    reject: (error: any) => void;
+}[] = [];
 
-function onRefreshed(accessToken:string) {
-    refreshSubscribers.map((callback) => callback(accessToken));
-}
-
-function addRefreshSubscriber(callback:(token:string)=> void) {
-    refreshSubscribers.push(callback);
-}
-
-api?.interceptors.request.use(
-    (config) => {
-        const jwt = Cookies.get("access_token")
-        if (jwt) {
-            config.headers["Authorization"] = `Bearer ${jwt}`
-            config.headers["Content-Type"] = "application/json"
+function processQueue(error: any, token: string | null = null) {
+    failedQueue.forEach((prom) => {
+        if (error) {
+            prom.reject(error);
+        } else if (token) {
+            prom.resolve(token);
         }
-        return config
+    });
+
+    failedQueue = [];
+}
+
+function logout() {
+    Cookies.remove("access_token");
+    Cookies.remove("refresh_token");
+    window.location.reload();
+}
+
+api.interceptors.request.use(
+    (config) => {
+        const token = Cookies.get("access_token");
+
+        if (token && config.headers) {
+            config.headers.set("Authorization", `Bearer ${token}`);
+        }
+
+        return config;
     },
-    (error) =>  Promise.reject(error)
-    
-)
+    (error) => Promise.reject(error)
+);
 
-// Add an interceptor to handle Refresh Token request
-
-api?.interceptors.response.use(
-    (response) =>  response,
+api.interceptors.response.use(
+    (response) => response,
     async (error) => {
         const originalRequest = error.config;
-        // Check if the error status is due to token expiration
-        // refreshToken
-        if (error.response && error.response.status === 403 && !originalRequest._retry) {
-            if (!isRefreshing) {
-                isRefreshing = true
-                originalRequest._retry = true;
-            
-                // Attempt to refresh the token
-                try {
-                    const refresh_token = Cookies.get("refresh_token")
-                    const response = await api.post("/api/v1/auth/refresh-token", {
-                        refresh_token
-                    }, {
+
+        if (!error.response) {
+            return Promise.reject(error);
+        }
+
+        if (error.response.status === 401 && !originalRequest._retry) {
+
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
+                }).then((token) => {
+                    originalRequest.headers.set("Authorization", `Bearer ${token}`);
+                    return api(originalRequest);
+                });
+            }
+
+            originalRequest._retry = true;
+            isRefreshing = true;
+
+            const refreshToken = Cookies.get("refresh_token");
+
+            try {
+                const { data } = await axios.post(
+                    `${BASE_URL}/api/v1/auth/refresh-token`,
+                    { refresh_token: refreshToken },
+                    {
                         headers: {
-                            "Authorization": `Bearer ${refresh_token}`,
-                            'Content-Type': 'application/json'
+                            Authorization: `Bearer ${refreshToken}`,
                         },
-                    });
-                    if (response.status === 200) {
-                      
-                        Cookies.set("access_token", response.data?.data?.access_token);
-                        Cookies.set("refresh_token", response.data?.data?.refresh_token);
-                        api.defaults.headers.common["Authorization"] = `Bearer ${response.data.access_token}`;
-                        api.defaults.headers.common["Content-Type"] = "application/json";
-                        // originalRequest.headers["Authorization"] = response.data.access_token
-                        isRefreshing = false;
-                        onRefreshed(response.data.access_token)
-                        refreshSubscribers = [];
-                        return api(originalRequest);
                     }
-                } catch (refreshError) {
-                    isRefreshing = false
-                    refreshSubscribers = [];
-                
-                    Cookies.remove("refresh_token");
-                    Cookies.remove("access_token");
-          
-                    reloadPage();
-                    return Promise.reject(refreshError);
-                }
-            }else {
-                return new Promise((resolve )=> {
-                    addRefreshSubscriber((accessToken:string)=>{
-                        originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
-                        resolve(api(originalRequest))
-                    })
-                })
+                );
+
+                const newAccessToken = data?.data?.access_token;
+                const newRefreshToken = data?.data?.refresh_token;
+
+                Cookies.set("access_token", newAccessToken);
+                Cookies.set("refresh_token", newRefreshToken);
+
+                api.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
+
+                processQueue(null, newAccessToken);
+
+                originalRequest.headers.set("Authorization", `Bearer ${newAccessToken}`);
+
+                return api(originalRequest);
+
+            } catch (err) {
+                processQueue(err, null);
+                logout();
+                return Promise.reject(err);
+            } finally {
+                isRefreshing = false;
             }
         }
 
-        // logout
-        if(error.response && error.response.status === 403 ) {
-            Cookies.remove("access_token")
-            Cookies.remove("refresh_token")
-            reloadPage();
-        }
         return Promise.reject(error);
     }
-)
-
-// Function to redirect the user to the login page
-function reloadPage() {
-    window.location.reload();
-}
+);

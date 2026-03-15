@@ -6,7 +6,7 @@ import { mergeClasses } from 'minimal-shared/utils';
 
 import { styled } from '@mui/material/styles';
 
-import { iconifyClasses } from './classes';
+//import { iconifyClasses } from './classes';
 import { allIconNames, registerIcons } from './register-icons';
 
 import type { IconifyName } from './register-icons';
@@ -15,12 +15,13 @@ import type { IconifyName } from './register-icons';
 
 export type IconifyProps = React.ComponentProps<typeof IconRoot> &
   Omit<IconProps, 'icon'> & {
-    icon: IconifyName;
+    icon: string;
   };
 
 export function Iconify({ className, icon, width = 20, height, sx, ...other }: IconifyProps) {
   const id = useId();
 
+  /*
   if (!allIconNames.includes(icon)) {
     console.warn(
       [
@@ -30,15 +31,16 @@ export function Iconify({ className, icon, width = 20, height, sx, ...other }: I
       ].join('\n')
     );
   }
+    */
 
-  registerIcons();
+ // registerIcons();
 
   return (
     <IconRoot
       ssr
       id={id}
       icon={icon}
-      className={mergeClasses([iconifyClasses.root, className])}
+      className={ className}
       sx={[
         {
           width,

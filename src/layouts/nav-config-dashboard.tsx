@@ -1,9 +1,9 @@
-import { Label } from 'src/components/label';
-import { SvgColor } from 'src/components/svg-color';
+import { Icon } from '@iconify/react';
+import { useTranslation } from 'react-i18next';
 
-// ----------------------------------------------------------------------
 
-const icon = (name: string) => <SvgColor src={`/assets/icons/navbar/${name}.svg`} />;
+const icon = (name: string) => <Icon icon={name} width={22} />;
+
 
 export type NavItem = {
   title: string;
@@ -46,26 +46,26 @@ export const navData = [
 ];
 
 
-import { useTranslation } from 'react-i18next';
 
 const navIcons = {
-  home: 'ic-analytics',
-  clients: 'ic-user',
-  listeners: 'ic-cart',
-  admin: 'ic-blog',
-  webhook: 'ic-lock',
-  not_found: 'ic-disabled',
+  home: 'ic-home',
+  sessions: 'ic-user',
+  listeners: 'ic-server',
+  admin: 'ic-settings',
+  webhook: 'ic-link',
+  websocket: 'ic-wifi',
 };
+
 
 export const useNavData = () => {
   const { t } = useTranslation();
 
   return [
-    { title: t('nav.home'), path: '/', icon: icon(navIcons.home) },
-    { title: t('nav.clients'), path: '/user', icon: icon(navIcons.clients) },
-    { title: t('nav.listeners'), path: '/products', icon: icon(navIcons.listeners) },
-    { title: t('nav.admin'), path: '/blog', icon: icon(navIcons.admin) },
-    { title: t('nav.webhook'), path: '/sign-in', icon: icon(navIcons.webhook) },
-    { title: t('nav.not_found'), path: '/404', icon: icon(navIcons.not_found) },
+    { title: t('nav.home'), path: '/', icon: icon('solar:home-2-bold') },
+    { title: t('nav.sessions'), path: '/sessions', icon: icon('mdi:account-group') },
+    { title: t('nav.listeners'), path: '/listeners', icon: icon('mdi:server-network') },
+    { title: t('nav.admin'), path: '/admins', icon: icon('mdi:shield-account') },
+    { title: t('nav.webhook'), path: '/webhooks', icon: icon('mdi:webhook') },
+    { title: t('nav.websocket'), path: '/websockets', icon: icon('mdi:connection') },
   ];
 };

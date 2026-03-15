@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 
-export function OverviewAnalyticsView() {
+export function HomeView() {
     const { t } = useTranslation();
   return (
     <DashboardContent maxWidth="xl">

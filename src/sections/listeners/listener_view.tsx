@@ -3,7 +3,7 @@
 import Typography from '@mui/material/Typography';
 import { DashboardContent } from 'src/layouts/dashboard';
 
-export function ProductsView() {
+export function ListenerView() {
 
   return (
     <DashboardContent maxWidth="xl">

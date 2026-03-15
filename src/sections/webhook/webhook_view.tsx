@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
 
-export function UserView() {
+export function WebhookView() {
 
   return (
     <DashboardContent  maxWidth="xl">
@@ -16,7 +16,7 @@ export function UserView() {
         }}
       >
         <Typography variant="h4" sx={{ flexGrow: 1 }}>
-          Users
+          Webhook page
         </Typography>
         <Button
           variant="contained"

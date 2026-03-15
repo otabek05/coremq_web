@@ -1,9 +1,8 @@
 
 import { AdminView } from 'src/sections/admin/view';
 
-// ----------------------------------------------------------------------
 
-export default function Page() {
+export default function AdminPage() {
   return (
     <>
       <AdminView />
